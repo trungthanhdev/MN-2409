@@ -719,9 +719,9 @@ loadFromLocal();
   </div>
 
   <!-- datalist -->
-  <datalist id="foods-list">
+  <!-- <datalist id="foods-list">
     <option v-for="f in foodsDB" :key="f.id ?? f.name" :value="f.name"></option>
-  </datalist>
+  </datalist> -->
 
   <div class="p-4">
     <!-- overflow-x cho fallback, min-w giữ layout bảng trên màn hẹp nếu muốn kéo ngang -->
@@ -756,11 +756,10 @@ loadFromLocal();
             <td class="cell-name" data-label="Food name">
               <div class="space-y-1.5">
                 <input
-                  v-model="r.name"
-                  list="foods-list"
-                  placeholder="Ví dụ: Ức gà, Cơm trắng…"
-                  class="tbl-input w-full"
-                />
+  v-model="r.name"
+  placeholder="Ví dụ: Ức gà, Cơm trắng…"
+  class="tbl-input w-full"
+/>
 
                 <!-- Chips gợi ý -->
           <div v-if="debouncedSuggestions[i]?.value?.length" class="flex flex-wrap gap-1.5">
