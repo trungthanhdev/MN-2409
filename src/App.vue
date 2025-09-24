@@ -48,13 +48,13 @@ watch(heightCM, v => { heightM.value  = toNum(v) / 100; });
 const bmi = computed(() =>
   heightM.value ? toNum(weight.value) / (heightM.value ** 2) : 0
 );
-const bmiLabel = computed(() => {
-  const b = bmi.value;
-  if (b < 18.5) return "Underweight";
-  if (b < 25)   return "Normal";
-  if (b < 30)   return "Overweight";
-  return "Obese";
-});
+// const bmiLabel = computed(() => {
+//   const b = bmi.value;
+//   if (b < 18.5) return "Underweight";
+//   if (b < 25)   return "Normal";
+//   if (b < 30)   return "Overweight";
+//   return "Obese";
+// });
 // --- BMI status & target ---
 const bmiInfo = computed(() => {
   const h = toNum(heightM.value);
@@ -95,13 +95,13 @@ const proteinPerKgActual = computed(() => {
 });
 
 // Cảnh báo nếu <1.6 hoặc >2.2 g/kg
-const proteinWarning = computed(() => {
-  const p = proteinPerKgActual.value;
-  if (!p) return "";
-  if (p < 1.6) return `⚠️ Protein hơi THẤP (${p.toFixed(2)} g/kg). Khuyến nghị 1.6 – 2.2 g/kg.`;
-  if (p > 2.2) return `⚠️ Protein hơi CAO (${p.toFixed(2)} g/kg). Khuyến nghị 1.6 – 2.2 g/kg.`;
-  return "";
-});
+// const proteinWarning = computed(() => {
+//   const p = proteinPerKgActual.value;
+//   if (!p) return "";
+//   if (p < 1.6) return `⚠️ Protein hơi THẤP (${p.toFixed(2)} g/kg). Khuyến nghị 1.6 – 2.2 g/kg.`;
+//   if (p > 2.2) return `⚠️ Protein hơi CAO (${p.toFixed(2)} g/kg). Khuyến nghị 1.6 – 2.2 g/kg.`;
+//   return "";
+// });
 
 
   return {
