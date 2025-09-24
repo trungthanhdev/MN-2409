@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, defineComponent, onMounted, nextTick } from "vue";
+import { ref, computed, watch, defineComponent, onMounted, nextTick, type Ref } from "vue";
 import * as XLSX from "xlsx"; 
 // type Food = { id?: number; name: string; protein: number; carb: number; fat: number };
 // --- Stat card ---
@@ -14,14 +14,37 @@ const Stat = defineComponent({
     </div>
   `,
 });
+
 function rowKcal(r: MealRow) {
   const m = rowMacro(r);
   // công thức kcal = protein*4 + carb*4 + fat*9
   return m.p * 4 + m.c * 4 + m.f * 9;
 }
-function useSuggestions(r: MealRow) {
-  return computed(() => suggestFoods(r.name));
+// function useSuggestions(r: MealRow) {
+//   return computed(() => suggestFoods(r.name));
+// }
+// const rowSuggestions = computed(() =>
+//   rowsMeal.value.map(r => suggestFoods(r.name))
+// );
+function useDebouncedSuggestions(r: MealRow, delay = 300) {
+  const suggestions = ref<Food[]>([]);
+  let timeout: any;
+
+  watch(() => r.name, (newValue) => {
+    clearTimeout(timeout);
+    if (!newValue) {
+      suggestions.value = [];
+      return;
+    }
+
+    timeout = setTimeout(() => {
+      suggestions.value = suggestFoods(newValue);  // Gọi hàm suggestFoods để tìm kiếm
+    }, delay);
+  });
+
+  return suggestions;
 }
+
 function calcTotalsNow() {
   return rowsMeal.value.reduce(
     (acc, r) => {
@@ -308,6 +331,14 @@ onMounted(async () => {
 
 type MealRow = { name: string; grams: number };
 const rowsMeal = ref<MealRow[]>([{ name: "", grams: 0 }]);
+// const rowsMeal = ref<MealRow[]>([{ name: "", grams: 0 }]);
+
+// ✅ Tạo suggestions cho từng row (debounce riêng)
+const debouncedSuggestions = ref<Array<Ref<Food[]>>>([]);
+
+watch(rowsMeal, (newRows) => {
+  debouncedSuggestions.value = newRows.map(r => useDebouncedSuggestions(r));
+}, { immediate: true, deep: true });
 
 const addRow = () => rowsMeal.value.push({ name: "", grams: 0 });
 const removeRow = (i: number) => rowsMeal.value.splice(i, 1);
@@ -335,27 +366,32 @@ function findFood(q: string): Food | undefined {
 function suggestFoods(q: string, limit = 6): Food[] {
   const key = mkKey(q);
   if (!key) return [];
-  const idx: Array<{id:number; key:string; name:string}> = (window as any).__foodsIndex || [];
+  const idx: Array<{ id: number; key: string; name: string }> = (window as any).__foodsIndex || [];
 
-  const scored = idx.map(e => {
-    let score = 0;
-    if (e.key === key) score = 100;
-    else if (e.key.startsWith(key)) score = 50;
-    else if (e.key.includes(key)) score = 10;
-    return { ...e, score };
-  })
-  .filter(x => x.score > 0)
-  .sort((a,b) => b.score - a.score || a.name.length - b.name.length);
+  const scored = idx
+    .map(e => {
+      let score = 0;
+      if (e.key === key) score = 100;
+      else if (e.key.startsWith(key)) score = 50;
+      else if (e.key.includes(key)) score = 10;
+      return { ...e, score };
+    })
+    .filter(x => x.score > 0)
+    .sort((a, b) => b.score - a.score || a.name.length - b.name.length);
 
-  // trả về Food unique theo id
+  // Trả về Food unique theo id
   const seen = new Set<number>();
   const out: Food[] = [];
   for (const s of scored) {
     if (seen.has(s.id)) continue;
     const f = foodsDB.value.find(x => x.id === s.id);
-    if (f) { out.push(f); seen.add(s.id); }
+    if (f) {
+      out.push(f);
+      seen.add(s.id);
+    }
     if (out.length >= limit) break;
   }
+
   return out;
 }
 
@@ -727,13 +763,12 @@ loadFromLocal();
                 />
 
                 <!-- Chips gợi ý -->
-               <div v-if="r.name && useSuggestions(r).value.length" class="flex flex-wrap gap-1.5">
+          <div v-if="debouncedSuggestions[i]?.value?.length" class="flex flex-wrap gap-1.5">
   <button
-    v-for="s in useSuggestions(r).value"
+    v-for="s in debouncedSuggestions[i].value"
     :key="s.id ?? s.name"
-    type="button"
-    class="chip"
     @click="r.name = s.name"
+    class="chip"
   >
     {{ s.name }}
   </button>
