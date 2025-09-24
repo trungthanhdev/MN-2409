@@ -15,7 +15,7 @@ const Stat = defineComponent({
     </div>
   `,
 });
-const router = useRouter();
+// const router = useRouter();
 
 // function goToSchedule() {
 //   router.push("/schedule");
