@@ -338,7 +338,7 @@ const debouncedSuggestions = ref<Array<Ref<Food[]>>>([]);
 
 watch(rowsMeal, (newRows) => {
   debouncedSuggestions.value = newRows.map(r => useDebouncedSuggestions(r));
-}, { immediate: true, deep: true });
+}, { immediate: true});
 
 const addRow = () => rowsMeal.value.push({ name: "", grams: 0 });
 const removeRow = (i: number) => rowsMeal.value.splice(i, 1);
@@ -940,12 +940,12 @@ loadFromLocal();
 .tbl-input::placeholder{ color:#94a3b8; } /* slate-400 */
 
 /* chống màu vàng/xanh của autofill iOS/Chrome */
-input.tbl-input:-webkit-autofill,
+/* input.tbl-input:-webkit-autofill,
 input.tbl-input:-webkit-autofill:hover,
 input.tbl-input:-webkit-autofill:focus{
   -webkit-box-shadow: 0 0 0px 1000px #fff inset !important;
   -webkit-text-fill-color:#0f172a !important;
-}
+} */
 
 /* gram css */
 .cell-gram { vertical-align: top; }
