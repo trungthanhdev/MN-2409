@@ -181,9 +181,9 @@ function loadFromLocal() {
 }
 function resetAll() {
   if (!confirm("Đặt lại về mặc định?")) return;
-  gender.value = "male"; age.value = 22; heightM.value = 1.7; heightCM.value = 170;
-  weight.value = 85; activity.value = 1.375;
-  preset.value = "maintenance"; macros.value = { p: 25, c: 45, f: 30 }; proteinPerKg.value = 1.8;
+  gender.value = "male"; age.value = 0; heightM.value = 0; heightCM.value = 0;
+  weight.value = 0; activity.value = 1.2;
+  preset.value = "maintenance"; macros.value = { p: 35, c: 30, f: 35 }; proteinPerKg.value = 1.8;
 }
 loadFromLocal();
 </script>
@@ -191,18 +191,34 @@ loadFromLocal();
 <template>
   <div class="min-h-screen bg-gradient-to-b from-emerald-50 to-white text-slate-800">
     <!-- Header -->
-    <header class="sticky top-0 z-20 bg-gradient-to-r from-emerald-700 to-emerald-600 text-white shadow-md">
-      <div class="max-w-none px-4 py-4 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="h-9 w-9 rounded-xl bg-white/15 grid place-items-center ring-1 ring-white/20 shrink-0">🍽️</div>
-          <h1 class="text-[clamp(18px,2.5vw,22px)] font-semibold tracking-tight truncate">Macro and Nutrition</h1>
-        </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-          <button @click="resetAll" class="btn btn-ghost flex-1 sm:flex-none">Đặt lại</button>
-          <button @click="saveToLocal" class="btn btn-primary flex-1 sm:flex-none">Lưu</button>
-        </div>
-      </div>
-    </header>
+    <!-- Header -->
+<header class="sticky top-0 z-20 bg-gradient-to-r from-emerald-700 to-emerald-600 text-white shadow-md">
+  <div class="max-w-none px-3 py-2 flex flex-wrap items-center justify-between gap-2">
+    <div class="flex items-center gap-2 min-w-0">
+      <div class="h-7 w-7 rounded-lg bg-white/15 grid place-items-center ring-1 ring-white/20 shrink-0">🍽️</div>
+      <h1 class="text-[clamp(16px,2vw,18px)] font-semibold tracking-tight truncate">
+        Macro and Nutrition
+      </h1>
+    </div>
+    <!-- Giảm size nút & tăng khoảng cách -->
+    <div class="flex items-center gap-4 w-full sm:w-auto">
+      <button
+        @click="resetAll"
+        class="btn btn-ghost flex-1 sm:flex-none text-xs px-2 py-1"
+      >
+        Đặt lại
+      </button>
+      <button
+        @click="saveToLocal"
+        class="btn btn-primary flex-1 sm:flex-none text-xs px-2 py-1"
+      >
+        Lưu
+      </button>
+    </div>
+  </div>
+</header>
+
+
 
     <!-- Main -->
     <main class="max-w-none px-4 py-6 space-y-6">
@@ -342,12 +358,15 @@ loadFromLocal();
                 <div class="kpi">{{ fatG.toFixed(2) }}<span class="unit">g</span></div>
                 <div class="mini">{{ macrosEffective.f.toFixed(1) }}%</div>
               </div>
-              <!-- <p v-if="proteinWarning"
-   class="mt-2 text-sm font-medium rounded-xl p-3 border
-          bg-amber-50 border-amber-200 text-amber-800">
-  {{ proteinWarning }}
-</p> -->
+            
             </div>
+             <p class="mt-2 text-sm italic text-slate-500">
+  Thông tin trên chỉ mang tính tham khảo và không thay thế tư vấn y khoa. 
+</p>
+<p class="mt-2 text-sm italic text-slate-500">
+  
+  Vui lòng tự chịu trách nhiệm cho các quyết định liên quan đến sức khỏe của bạn.
+</p>
           </div>
 
           <div class="space-y-3">
@@ -364,6 +383,16 @@ loadFromLocal();
           </div>
         </div>
       </section>
+
+<!-- Nutrition  -->
+<section class="card overflow-hidden">
+   <div class="section-title">Food Nutrition (USDA, FAO, FatSecret)</div>
+   <div class="text-center text-sm text-slate-500 py-4">
+  Coming soon.
+</div>
+
+</section>
+
 
       <div class="text-center text-[12px] text-slate-500">
         Copyrights © 2025 by @trungthanhdev. 
