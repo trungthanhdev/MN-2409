@@ -19,7 +19,9 @@ function rowKcal(r: MealRow) {
   // công thức kcal = protein*4 + carb*4 + fat*9
   return m.p * 4 + m.c * 4 + m.f * 9;
 }
-
+function useSuggestions(r: MealRow) {
+  return computed(() => suggestFoods(r.name));
+}
 function calcTotalsNow() {
   return rowsMeal.value.reduce(
     (acc, r) => {
@@ -725,21 +727,17 @@ loadFromLocal();
                 />
 
                 <!-- Chips gợi ý -->
-                <div
-                  v-if="r.name && suggestFoods(r.name).length"
-                  class="flex flex-wrap gap-1.5"
-                >
-                  <button
-                    v-for="s in suggestFoods(r.name)"
-                    :key="s.id ?? s.name"
-                    type="button"
-                    class="chip"
-                    @click="r.name = s.name"
-                    :title="`Chọn: ${s.name}`"
-                  >
-                    {{ s.name }}
-                  </button>
-                </div>
+               <div v-if="r.name && useSuggestions(r).value.length" class="flex flex-wrap gap-1.5">
+  <button
+    v-for="s in useSuggestions(r).value"
+    :key="s.id ?? s.name"
+    type="button"
+    class="chip"
+    @click="r.name = s.name"
+  >
+    {{ s.name }}
+  </button>
+</div>
 
                 <!-- Cảnh báo -->
                 <div
