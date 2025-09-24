@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, defineComponent, onMounted, nextTick, type Ref } from "vue";
 import * as XLSX from "xlsx"; 
-import { useRouter } from "vue-router";
+// import { useRouter } from "vue-router";
 
 const Stat = defineComponent({
   name: "Stat",
