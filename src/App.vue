@@ -88,11 +88,11 @@ const bmiInfo = computed(() => {
     : "";
 
   // Protein/kg thực tế (dựa trên TDEE và % user nhập)
-const proteinPerKgActual = computed(() => {
-  const w = toNum(weight.value, 0);
-  if (!w) return 0;
-  return proteinG.value / w; // g protein / kg
-});
+// const proteinPerKgActual = computed(() => {
+//   const w = toNum(weight.value, 0);
+//   if (!w) return 0;
+//   return proteinG.value / w; // g protein / kg
+// });
 
 // Cảnh báo nếu <1.6 hoặc >2.2 g/kg
 // const proteinWarning = computed(() => {
