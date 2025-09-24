@@ -17,9 +17,9 @@ const Stat = defineComponent({
 });
 const router = useRouter();
 
-function goToSchedule() {
-  router.push("/schedule");
-}
+// function goToSchedule() {
+//   router.push("/schedule");
+// }
 function rowKcal(r: MealRow) {
   const m = rowMacro(r);
   return m.p * 4 + m.c * 4 + m.f * 9;
