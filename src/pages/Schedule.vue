@@ -96,14 +96,14 @@ function closeModal() {
       <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         <h1 class="font-bold text-xl flex items-center gap-3">
           <!-- <span class="text-2xl">🏋️</span>  -->
-          Workout Schedule
+          Chế độ tập luyện
         </h1>
         <div class="flex gap-3">
           <router-link
             to="/"
             class="bg-white text-teal-700 px-4 py-2 rounded-full text-sm font-semibold shadow-md hover:bg-teal-50 transition-all duration-300"
           >
-            Trang chủ
+            Dinh dưỡng
           </router-link>
         </div>
       </div>
