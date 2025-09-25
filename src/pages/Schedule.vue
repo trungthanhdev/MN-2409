@@ -23,16 +23,13 @@ const initialWorkoutGroups: WorkoutGroup[] = [
   {
     title: "Chest",
     exercises: [
-      { id: 1, order: 1, name: "Incline barbell press", setsReps: "5x10", weight: "40kg", focus: "Upper chest" },
-      { id: 2, order: 2, name: "Cable chest press", setsReps: "3x15", weight: "25kg", focus: "Upper/Middle chest" },
-      { id: 3, order: 3, name: "Decline chest press", setsReps: "3x10", weight: "50kg", focus: "Lower chest", tips: "Slow, negative ROM" }
+      { id: 1, order: 1, name: "Bài tập 1", setsReps: "5x10", weight: "20kg", focus: "Body" }
     ]
   },
   {
     title: "Back",
     exercises: [
-      { id: 1, order: 1, name: "Wide grip lat pull down", setsReps: "3x10", weight: "35kg", focus: "Lat" },
-      { id: 2, order: 2, name: "Dumbbell row", setsReps: "3x10", weight: "20kg", focus: "Thicker back" }
+      { id: 1, order: 1, name: "Bài tập 1", setsReps: "3x10", weight: "35kg", focus: "Body" }
     ]
   }
 ];
@@ -113,22 +110,32 @@ function closeModal() {
     </header>
 
     <!-- Main -->
-    <main class="max-w-5xl mx-auto px-6 py-10 space-y-8">
+    <main class="max-w-5xl mx-auto px-2 py-4 space-y-8">
       <!-- Buttons: Save and Add New Day -->
-      <div class="flex justify-end gap-3">
-        <button
-          @click="saveToLocalStorage"
-          class="px-4 py-3 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-300"
-        >
-          Lưu
-        </button>
-        <button
-          @click="openAddWorkoutGroupModal"
-          class="px-4 py-3 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-300"
-        >
-          + Thêm lịch tập
-        </button>
-      </div>
+     <div class="mt-4 border-t border-slate-200 pt-3">
+  <p class="text-sm text-slate-500 italic leading-relaxed">
+    <strong class="text-slate-700">Lưu ý:</strong>
+    Trong tập luyện để đạt được kết quả mong muốn, thì 
+    <span class="font-bold text-slate-700">70%</span> đến từ việc ăn uống 
+    và <span class="font-bold text-slate-700">30%</span> đến từ việc tập luyện. 
+    Hãy đảm bảo bạn có một kế hoạch dinh dưỡng hợp lý và chương trình luyện tập phù hợp.
+  </p>
+  <div class="flex justify-end gap-3 mt-4">
+    <button
+      @click="saveToLocalStorage"
+      class="px-4 py-2 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-300"
+    >
+      Lưu
+    </button>
+    <button
+      @click="openAddWorkoutGroupModal"
+      class="px-4 py-2 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-300"
+    >
+      + Thêm lịch tập
+    </button>
+  </div>
+</div>
+
 
       <!-- Modal for Adding New Workout Group -->
       <div
@@ -174,7 +181,7 @@ function closeModal() {
           <div
             v-for="ex in group.exercises"
             :key="ex.id"
-            class="p-6 hover:bg-gray-50 transition-all duration-200 space-y-4"
+            class="p-2 pt-6  hover:bg-gray-50 transition-all duration-200 space-y-4"
           >
             <!-- Row 1: Order + Name -->
             <div class="flex items-center gap-4">
@@ -187,7 +194,7 @@ function closeModal() {
               <input
                 v-model="ex.name"
                 class="detail-input flex-1 bg-gray-50 rounded-lg"
-                placeholder="Exercise name"
+                placeholder="Tên bài tập"
               />
             </div>
 
@@ -198,7 +205,7 @@ function closeModal() {
                 <input
                   v-model="ex.weight"
                   class="detail-input text-center bg-gray-50 rounded-lg"
-                  placeholder="40kg"
+                  placeholder="20kg"
                 />
               </div>
               <div class="flex items-center gap-3">
@@ -210,20 +217,21 @@ function closeModal() {
                 />
               </div>
               <div class="flex items-center gap-3">
-                <span class="field-label">Focus:</span>
+                <span class="field-label">Nhóm cơ:</span>
                 <input
                   v-model="ex.focus"
                   class="detail-input text-center bg-gray-50 rounded-lg"
-                  placeholder="Muscle"
+                  placeholder="Nhóm cơ"
                 />
               </div>
               <div class="flex items-center gap-3 col-span-1 sm:col-span-2 lg:col-span-1">
-                <span class="field-label">Notes:</span>
-                <input
-                  v-model="ex.note"
-                  class="detail-input flex-1 bg-gray-50 rounded-lg"
-                  placeholder="Your notes..."
-                />
+                <span class="field-label">Ghi chú:</span>
+                <textarea
+  v-model="ex.note"
+  class="detail-input flex-1 bg-gray-50 rounded-lg p-2 resize-none"
+  placeholder="Ghi chú"
+  rows="3"
+/>
               </div>
             </div>
           </div>
@@ -238,6 +246,10 @@ function closeModal() {
             + Add Exercise
           </button>
         </div>
+        
+      </div>
+       <div class="text-center text-[12px] text-slate-500">
+        Copyrights © 2025 by @trungthanhdev.
       </div>
     </main>
   </div>

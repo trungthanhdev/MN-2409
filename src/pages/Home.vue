@@ -536,7 +536,7 @@ loadFromLocal();
     </header>
 
     <!-- Main -->
-    <main class="max-w-5xl mx-auto px-6 py-10 space-y-8">
+    <main class="max-w-5xl mx-auto px-2 py-4 space-y-8">
       <!-- Meal ratio -->
       <section class="card overflow-hidden">
         <div class="section-title">Điều chỉnh tỉ lệ</div>
@@ -824,8 +824,8 @@ loadFromLocal();
 </template>
 
 <style scoped>
-.card { @apply bg-white/80 backdrop-blur border border-gray-200 shadow-sm rounded-2xl; }
-.section-title { @apply px-4 py-3 bg-gradient-to-r from-teal-600 to-teal-500 text-white font-semibold tracking-wide; }
+.card { @apply bg-white/80 backdrop-blur border border-gray-200 shadow-sm rounded-2xl p-1; }
+.section-title { @apply px-4 py-3 bg-gradient-to-r from-teal-600 to-teal-500 text-white font-semibold tracking-wide rounded-xl; }
 .label { @apply block text-[13px] font-medium text-slate-700; }
 .note  { @apply text-[12px] text-slate-500; }
 
@@ -1000,7 +1000,7 @@ loadFromLocal();
     border: 1px solid #e2e8f0;
     border-radius: 14px;
     box-shadow: 0 1px 2px rgba(0,0,0,.03);
-    padding: 10px;
+    padding: 2px;
     margin-bottom: 10px;
   }
 
