@@ -1,6 +1,6 @@
 ```vue
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 
 interface Exercise {
   id: number;
@@ -49,11 +49,15 @@ onMounted(() => {
 // Save data to localStorage
 function saveToLocalStorage() {
   localStorage.setItem("workoutGroups", JSON.stringify(workoutGroups.value));
+  console.log("Data auto-saved to localStorage");
 }
 
-const showModal = ref(false);
-const newGroupTitle = ref("");
+// Watch for changes in workoutGroups and auto-save
+watch(workoutGroups, () => {
+  saveToLocalStorage();
+}, { deep: true });
 
+// Add exercise to a group
 function addExercise(group: WorkoutGroup) {
   group.exercises.push({
     id: group.exercises.length + 1,
@@ -66,6 +70,14 @@ function addExercise(group: WorkoutGroup) {
     selected: false
   });
 }
+
+const showModal = ref(false);
+const newGroupTitle = ref("");
+
+// Watch for changes in newGroupTitle and auto-save
+watch(newGroupTitle, () => {
+  saveToLocalStorage();
+});
 
 function openAddWorkoutGroupModal() {
   newGroupTitle.value = "";
@@ -95,7 +107,6 @@ function closeModal() {
     <header class="bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg sticky top-0 z-50">
       <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         <h1 class="font-bold text-xl flex items-center gap-3">
-          <!-- <span class="text-2xl">🏋️</span>  -->
           Chế độ tập luyện
         </h1>
         <div class="flex gap-3">
@@ -111,31 +122,24 @@ function closeModal() {
 
     <!-- Main -->
     <main class="max-w-5xl mx-auto px-2 py-4 space-y-8">
-      <!-- Buttons: Save and Add New Day -->
-     <div class="mt-4 border-t border-slate-200 pt-3">
-  <p class="text-sm text-slate-500 italic leading-relaxed">
-    <strong class="text-slate-700">Lưu ý:</strong>
-    Trong tập luyện để đạt được kết quả mong muốn, thì 
-    <span class="font-bold text-slate-700">70%</span> đến từ việc ăn uống 
-    và <span class="font-bold text-slate-700">30%</span> đến từ việc tập luyện. 
-    Hãy đảm bảo bạn có một kế hoạch dinh dưỡng hợp lý và chương trình luyện tập phù hợp.
-  </p>
-  <div class="flex justify-end gap-3 mt-4">
-    <button
-      @click="saveToLocalStorage"
-      class="px-4 py-2 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-300"
-    >
-      Lưu
-    </button>
-    <button
-      @click="openAddWorkoutGroupModal"
-      class="px-4 py-2 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-300"
-    >
-      + Thêm lịch tập
-    </button>
-  </div>
-</div>
-
+      <!-- Note and Add New Day Button -->
+      <div class="mt-4 border-t border-slate-200 pt-3">
+        <p class="text-sm text-slate-500 italic leading-relaxed">
+          <strong class="text-slate-700">Lưu ý:</strong>
+          Trong tập luyện để đạt được kết quả mong muốn, thì 
+          <span class="font-bold text-slate-700">70%</span> đến từ việc ăn uống 
+          và <span class="font-bold text-slate-700">30%</span> đến từ việc tập luyện. 
+          Hãy đảm bảo bạn có một kế hoạch dinh dưỡng hợp lý và chương trình luyện tập phù hợp.
+        </p>
+        <div class="flex justify-end gap-3 mt-4">
+          <button
+            @click="openAddWorkoutGroupModal"
+            class="px-4 py-2 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-300"
+          >
+            + Thêm lịch tập
+          </button>
+        </div>
+      </div>
 
       <!-- Modal for Adding New Workout Group -->
       <div
@@ -166,6 +170,7 @@ function closeModal() {
         </div>
       </div>
 
+      <!-- Workout Groups -->
       <div
         v-for="group in workoutGroups"
         :key="group.title"
@@ -181,7 +186,7 @@ function closeModal() {
           <div
             v-for="ex in group.exercises"
             :key="ex.id"
-            class="p-2 pt-6  hover:bg-gray-50 transition-all duration-200 space-y-4"
+            class="p-2 pt-6 hover:bg-gray-50 transition-all duration-200 space-y-4"
           >
             <!-- Row 1: Order + Name -->
             <div class="flex items-center gap-4">
@@ -227,11 +232,11 @@ function closeModal() {
               <div class="flex items-center gap-3 col-span-1 sm:col-span-2 lg:col-span-1">
                 <span class="field-label">Ghi chú:</span>
                 <textarea
-  v-model="ex.note"
-  class="detail-input flex-1 bg-gray-50 rounded-lg p-2 resize-none"
-  placeholder="Ghi chú"
-  rows="3"
-/>
+                  v-model="ex.note"
+                  class="detail-input flex-1 bg-gray-50 rounded-lg p-2 resize-none"
+                  placeholder="Ghi chú"
+                  rows="3"
+                />
               </div>
             </div>
           </div>
@@ -246,9 +251,8 @@ function closeModal() {
             + Add Exercise
           </button>
         </div>
-        
       </div>
-       <div class="text-center text-[12px] text-slate-500">
+      <div class="text-center text-[12px] text-slate-500">
         Copyrights © 2025 by @trungthanhdev.
       </div>
     </main>
@@ -259,12 +263,6 @@ function closeModal() {
 .order-input {
   @apply border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700
          focus:outline-none focus:ring-2 focus:ring-teal-300 transition-all duration-200;
-}
-
-.exercise-name {
-  @apply border-b border-gray-200 text-base font-medium 
-         focus:outline-none focus:border-teal-400 placeholder-teal-500
-         py-2 transition-all duration-200;
 }
 
 .detail-input {
@@ -278,7 +276,7 @@ function closeModal() {
 }
 
 /* Smooth hover and focus effects */
-input:focus, button:focus {
+input:focus, button:focus, textarea:focus {
   @apply outline-none;
 }
 
