@@ -709,7 +709,7 @@ loadFromLocal();
                         v-else-if="r.name && !findFood(r.name)"
                         class="warn"
                       >
-                        Không tìm thấy trong DB — thử gõ tên khác hoặc chọn gợi ý.
+                        Không tìm thấy — thử gõ tên khác hoặc chọn gợi ý.
                       </div>
                     </div>
                   </td>
@@ -719,15 +719,15 @@ loadFromLocal();
                       min="0"
                       step="1"
                       v-model.number="r.grams"
-                      class="tbl-input text-right"
+                      class="tbl-input text-center"
                       placeholder="0"
                     />
                   </td>
-                  <td class="num" :data-label="'Protein (g)'">{{ rowMacro(r).p.toFixed(1) }}</td>
-                  <td class="num" :data-label="'Carb (g)'">{{ rowMacro(r).c.toFixed(1) }}</td>
-                  <td class="num" :data-label="'Fat (g)'">{{ rowMacro(r).f.toFixed(1) }}</td>
-                  <td class="num" :data-label="'Kcal'">{{ rowKcal(r).toFixed(1) }}</td>
-                  <td class="text-right" data-label="">
+                  <td class="num text-slate-800" :data-label="'Protein (g)'">{{ rowMacro(r).p.toFixed(1) }}</td>
+                  <td class="num text-slate-800" :data-label="'Carb (g)'">{{ rowMacro(r).c.toFixed(1) }}</td>
+                  <td class="num text-slate-800" :data-label="'Fat (g)'">{{ rowMacro(r).f.toFixed(1) }}</td>
+                  <td class="num text-slate-800" :data-label="'Kcal'">{{ rowKcal(r).toFixed(1) }}</td>
+                  <td class="text-right text-slate-800" data-label="">
                     <button
                       @click="removeRow(i)"
                       class="icon-btn"
