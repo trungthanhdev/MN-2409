@@ -1,8 +1,7 @@
 ```vue
 <script setup lang="ts">
 import { ref, computed, watch, defineComponent, onMounted, nextTick, type Ref } from "vue";
-import * as XLSX from "xlsx"; 
-// import { useRouter } from "vue-router";
+import * as XLSX from "xlsx";
 
 const Stat = defineComponent({
   name: "Stat",
@@ -15,30 +14,28 @@ const Stat = defineComponent({
     </div>
   `,
 });
-// const router = useRouter();
 
-// function goToSchedule() {
-//   router.push("/schedule");
-// }
 function rowKcal(r: MealRow) {
   const m = rowMacro(r);
   return m.p * 4 + m.c * 4 + m.f * 9;
 }
+
 function useDebouncedSuggestions(r: MealRow, delay = 300) {
   const suggestions = ref<Food[]>([]);
   let timeout: any;
 
-  watch(() => r.name, (newValue) => {
+  const updateSuggestions = (newValue: string) => {
     clearTimeout(timeout);
     if (!newValue) {
       suggestions.value = [];
       return;
     }
-
     timeout = setTimeout(() => {
       suggestions.value = suggestFoods(newValue);
     }, delay);
-  });
+  };
+
+  watch(() => r.name, updateSuggestions, { immediate: true });
 
   return suggestions;
 }
@@ -47,20 +44,21 @@ function calcTotalsNow() {
   return rowsMeal.value.reduce(
     (acc, r) => {
       const m = rowMacro(r);
-      acc.p    += m.p;
-      acc.c    += m.c;
-      acc.f    += m.f;
+      acc.p += m.p;
+      acc.c += m.c;
+      acc.f += m.f;
       acc.kcal += m.p * 4 + m.c * 4 + m.f * 9;
       return acc;
     },
     { p: 0, c: 0, f: 0, kcal: 0 }
   );
 }
-const gender   = ref<"male" | "female">("male");
-const age      = ref(0);
-const heightM  = ref(0);
+
+const gender = ref<"male" | "female">("male");
+const age = ref(0);
+const heightM = ref(0);
 const heightCM = ref(0);
-const weight   = ref(0);
+const weight = ref(0);
 const activity = ref(1.2);
 
 const activities = [
@@ -71,8 +69,8 @@ const activities = [
   { label: "Very Active", value: 1.9 },
 ];
 
-const preset  = ref<"maintenance" | "bulking" | "cutting" | "custom">("maintenance");
-const macros  = ref({ p: 35, c: 30, f: 35 });
+const preset = ref<"maintenance" | "bulking" | "cutting" | "custom">("maintenance");
+const macros = ref({ p: 35, c: 30, f: 35 });
 const proteinPerKg = ref(1.8);
 
 function toNum(v: unknown, fallback = 0) {
@@ -80,6 +78,7 @@ function toNum(v: unknown, fallback = 0) {
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
 }
+
 function sanitizeMealRows(raw: any): { name: string; grams: number }[] {
   if (!Array.isArray(raw)) return [{ name: "", grams: 0 }];
   const rows = raw
@@ -92,8 +91,8 @@ function sanitizeMealRows(raw: any): { name: string; grams: number }[] {
   return rows.length ? rows : [{ name: "", grams: 0 }];
 }
 
-watch(heightM,  v => { heightCM.value = Math.round(toNum(v) * 100) || 0; });
-watch(heightCM, v => { heightM.value  = toNum(v) / 100; });
+watch(heightM, v => { heightCM.value = Math.round(toNum(v) * 100) || 0; });
+watch(heightCM, v => { heightM.value = toNum(v) / 100; });
 
 const bmi = computed(() =>
   heightM.value ? toNum(weight.value) / (heightM.value ** 2) : 0
@@ -105,9 +104,9 @@ const bmiInfo = computed(() => {
   const b = h ? w / (h * h) : 0;
 
   let status = "Underweight", bad = true, tone: "ok" | "warn" | "bad" = "bad";
-  if (b >= 30) { status = "Obese";       bad = true;  tone = "bad"; }
-  else if (b >= 25) { status = "Overweight"; bad = true;  tone = "warn"; }
-  else if (b >= 18.5) { status = "Normal";   bad = false; tone = "ok"; }
+  if (b >= 30) { status = "Obese"; bad = true; tone = "bad"; }
+  else if (b >= 25) { status = "Overweight"; bad = true; tone = "warn"; }
+  else if (b >= 18.5) { status = "Normal"; bad = false; tone = "ok"; }
 
   const normalMin = h ? 18.5 * h * h : 0;
   const normalMax = h ? 24.9 * h * h : 0;
@@ -138,15 +137,16 @@ const ibw = computed(() => 22 * (heightM.value ** 2));
 const bmr = computed(() => {
   const kg = toNum(weight.value);
   const cm = toNum(heightCM.value);
-  const a  = toNum(age.value);
+  const a = toNum(age.value);
   if (!kg || !cm || !a) return 0;
   return gender.value === "male"
     ? (10 * kg + 6.25 * cm - 5 * a + 5)
     : (10 * kg + 6.25 * cm - 5 * a - 161);
 });
+
 const tdee = computed(() => {
   const base = toNum(bmr.value, 0);
-  const act  = toNum(activity.value, 1);
+  const act = toNum(activity.value, 1);
   return base * (act || 1);
 });
 
@@ -166,7 +166,7 @@ const fatG = computed(() =>
 );
 
 function applyPreset() {
-  if (preset.value === "bulking")      macros.value = { p: 35, c: 40, f: 25 };
+  if (preset.value === "bulking") macros.value = { p: 35, c: 40, f: 25 };
   else if (preset.value === "maintenance") macros.value = { p: 35, c: 30, f: 35 };
   else if (preset.value === "cutting") macros.value = { p: 40, c: 30, f: 30 };
 }
@@ -176,11 +176,12 @@ type Food = { id?: number; name: string; protein: number; carb: number; fat: num
 function mkKey(s: string) {
   return s
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g,"d").replace(/Đ/g,"D")
+    .replace(/đ/g, "d").replace(/Đ/g, "D")
     .toLowerCase()
-    .replace(/\s+/g," ")
+    .replace(/\s+/g, " ")
     .trim();
 }
+
 function makeAliases(name: string): string[] {
   const raw = name.trim();
   const m = raw.match(/\(([^)]+)\)/);
@@ -197,6 +198,7 @@ function toNumLoose(v: any): number {
   if (v == null) return 0;
   return Number(String(v).replace(",", ".").trim()) || 0;
 }
+
 async function loadFoods(): Promise<Food[]> {
   const url = `${import.meta.env.BASE_URL}foods.xlsx?v=${Date.now()}`;
   const res = await fetch(url, { cache: "no-store" });
@@ -205,12 +207,12 @@ async function loadFoods(): Promise<Food[]> {
   const buf = await res.arrayBuffer();
   const wb = XLSX.read(buf, { type: "array" });
 
-  function scoreConfig(table: string[][], cfg: {name:number; type:number; value:number; unit?:number}) {
+  function scoreConfig(table: string[][], cfg: { name: number; type: number; value: number; unit?: number }) {
     let ok = 0, total = 0;
     for (let i = 1; i < table.length; i++) {
       const row = table[i]; if (!row) continue;
-      const name  = String(row[cfg.name]  ?? "").trim();
-      const type  = String(row[cfg.type]  ?? "").toLowerCase();
+      const name = String(row[cfg.name] ?? "").trim();
+      const type = String(row[cfg.type] ?? "").toLowerCase();
       const value = toNumLoose(row[cfg.value]);
       if (!name || !value) continue;
       if (!/(protein|carb|fat|lipid|glucid|đạm|béo|tinh bột)/i.test(type)) continue;
@@ -237,10 +239,10 @@ async function loadFoods(): Promise<Food[]> {
     if (headerRowIdx >= 0) {
       const headers = table[headerRowIdx] ?? [];
       const norm = headers.map(h => String(h).toLowerCase().trim());
-      idxName  = norm.findIndex(h => h.includes("name"));
-      idxType  = norm.findIndex(h => h.includes("type"));
+      idxName = norm.findIndex(h => h.includes("name"));
+      idxType = norm.findIndex(h => h.includes("type"));
       idxValue = norm.findIndex(h => h.includes("value"));
-      idxUnit  = norm.findIndex(h => h.includes("unit"));
+      idxUnit = norm.findIndex(h => h.includes("unit"));
       startRow = headerRowIdx + 1;
     } else {
       const candidates: { name: number; type: number; value: number; unit: number }[] = [
@@ -248,7 +250,7 @@ async function loadFoods(): Promise<Food[]> {
         { name: 1, type: 2, value: 3, unit: 4 },
         { name: 2, type: 4, value: 5, unit: 3 },
       ];
-      let best : { name: number; type: number; value: number; unit: number } | undefined = candidates[0], bestScore = -1;
+      let best: { name: number; type: number; value: number; unit: number } | undefined = candidates[0], bestScore = -1;
       for (const c of candidates) {
         const { ok } = scoreConfig(table, c);
         if (ok > bestScore) { bestScore = ok; best = c; }
@@ -264,8 +266,8 @@ async function loadFoods(): Promise<Food[]> {
 
     for (let i = startRow; i < table.length; i++) {
       const row = table[i]; if (!row) continue;
-      const name  = String(row[idxName]  ?? "").trim();
-      const type  = String(row[idxType]  ?? "").toLowerCase();
+      const name = String(row[idxName] ?? "").trim();
+      const type = String(row[idxType] ?? "").toLowerCase();
       const value = toNumLoose(row[idxValue]);
 
       if (!name || !value) continue;
@@ -281,7 +283,7 @@ async function loadFoods(): Promise<Food[]> {
   const arr = [...map.values()];
   console.log("foods loaded (robust):", arr.length, arr.slice(0, 5));
 
-  const idx: Array<{ id:number; key:string; name:string }> = [];
+  const idx: Array<{ id: number; key: string; name: string }> = [];
   for (const f of arr) {
     for (const alias of makeAliases(f.name)) {
       idx.push({ id: f.id!, key: mkKey(alias), name: f.name });
@@ -296,6 +298,7 @@ const foodsDB = ref<Food[]>([]);
 onMounted(async () => {
   try {
     foodsDB.value = await loadFoods();
+    loadFromLocal(); 
   } catch (e) {
     console.error(e);
   }
@@ -305,19 +308,33 @@ type MealRow = { name: string; grams: number };
 const rowsMeal = ref<MealRow[]>([{ name: "", grams: 0 }]);
 
 const debouncedSuggestions = ref<Array<Ref<Food[]>>>([]);
+const showSuggestions = ref<boolean[]>([]);
 
 watch(rowsMeal, (newRows) => {
   debouncedSuggestions.value = newRows.map(r => useDebouncedSuggestions(r));
-}, { immediate: true});
+  showSuggestions.value = new Array(newRows.length).fill(false);
+}, { deep: true, immediate: true });
 
-const addRow = () => rowsMeal.value.push({ name: "", grams: 0 });
-const removeRow = (i: number) => rowsMeal.value.splice(i, 1);
+const addRow = () => {
+  rowsMeal.value.push({ name: "", grams: 0 });
+  showSuggestions.value.push(false);
+};
+
+const removeRow = (i: number) => {
+  rowsMeal.value.splice(i, 1);
+  debouncedSuggestions.value.splice(i, 1);
+  showSuggestions.value.splice(i, 1);
+};
+
+function resetSuggestions() {
+  showSuggestions.value = showSuggestions.value.map(() => false);
+}
 
 function findFood(q: string): Food | undefined {
   const key = mkKey(q);
   if (!key) return;
 
-  const idx: Array<{id:number; key:string; name:string}> = (window as any).__foodsIndex || [];
+  const idx: Array<{ id: number; key: string; name: string }> = (window as any).__foodsIndex || [];
 
   const exact = idx.find(e => e.key === key);
   if (exact) return foodsDB.value.find(f => f.id === exact.id);
@@ -371,9 +388,9 @@ const totalsMeal = computed(() =>
   rowsMeal.value.reduce(
     (acc, r) => {
       const m = rowMacro(r);
-      acc.p    += m.p;
-      acc.c    += m.c;
-      acc.f    += m.f;
+      acc.p += m.p;
+      acc.c += m.c;
+      acc.f += m.f;
       acc.kcal += m.p * 4 + m.c * 4 + m.f * 9;
       return acc;
     },
@@ -387,7 +404,7 @@ const kcalNotice = computed(() => {
   if (!t) return null;
 
   const diff = k - t;
-  const pct  = (diff / t) * 100;
+  const pct = (diff / t) * 100;
 
   let tone: "ok" | "warn" | "bad" = "ok";
   if (Math.abs(pct) >= 20) tone = "bad";
@@ -406,9 +423,7 @@ const kcalNotice = computed(() => {
 const KEY = "meal-planner-v1";
 async function saveToLocal() {
   await nextTick();
-
   const foodsReady = foodsDB.value.length > 0;
-
   const totalsNow = calcTotalsNow();
   const data = {
     gender: gender.value,
@@ -431,22 +446,25 @@ async function saveToLocal() {
   };
   localStorage.setItem(KEY, JSON.stringify(data));
   alert("Đã lưu cấu hình & bữa ăn vào trình duyệt.");
+  resetSuggestions();
 }
+
 const savedTotals = ref<{ protein: number; carb: number; fat: number; kcal: number } | null>(null);
+
 function loadFromLocal() {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return;
     const d = JSON.parse(raw);
 
-    gender.value   = d.gender   ?? gender.value;
-    age.value      = toNum(d.age, age.value);
-    heightM.value  = toNum(d.heightM, heightM.value);
+    gender.value = d.gender ?? gender.value;
+    age.value = toNum(d.age, age.value);
+    heightM.value = toNum(d.heightM, heightM.value);
     heightCM.value = toNum(d.heightCM, heightCM.value);
-    weight.value   = toNum(d.weight, weight.value);
+    weight.value = toNum(d.weight, weight.value);
     activity.value = toNum(d.activity, activity.value);
-    preset.value   = d.preset   ?? preset.value;
-    macros.value   = d.macros   ?? macros.value;
+    preset.value = d.preset ?? preset.value;
+    macros.value = d.macros ?? macros.value;
     proteinPerKg.value = toNum(d.proteinPerKg, proteinPerKg.value);
 
     if (d.rowsMeal) {
@@ -455,9 +473,9 @@ function loadFromLocal() {
     if (d.totals) {
       savedTotals.value = {
         protein: Number(d.totals.protein) || 0,
-        carb:    Number(d.totals.carb)    || 0,
-        fat:     Number(d.totals.fat)     || 0,
-        kcal:    Number(d.totals.kcal)    || 0,
+        carb: Number(d.totals.carb) || 0,
+        fat: Number(d.totals.fat) || 0,
+        kcal: Number(d.totals.kcal) || 0,
       };
     }
   } catch (e) {
@@ -467,10 +485,19 @@ function loadFromLocal() {
 
 function resetAll() {
   if (!confirm("Đặt lại về mặc định?")) return;
-  gender.value = "male"; age.value = 0; heightM.value = 0; heightCM.value = 0;
-  weight.value = 0; activity.value = 1.2;
-  preset.value = "maintenance"; macros.value = { p: 35, c: 30, f: 35 }; proteinPerKg.value = 1.8;
+  gender.value = "male";
+  age.value = 0;
+  heightM.value = 0;
+  heightCM.value = 0;
+  weight.value = 0;
+  activity.value = 1.2;
+  preset.value = "maintenance";
+  macros.value = { p: 35, c: 30, f: 35 };
+  proteinPerKg.value = 1.8;
+  rowsMeal.value = [{ name: "", grams: 0 }];
+  resetSuggestions();
 }
+
 loadFromLocal();
 </script>
 
@@ -480,13 +507,13 @@ loadFromLocal();
     <header class="sticky top-0 z-20 bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg">
       <div class="max-w-none px-3 py-2 flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0">
-          <!-- <div class="h-7 w-7 rounded-lg bg-white/15 grid place-items-center ring-1 ring-white/20 shrink-0"></div> -->
           <h1 class="text-[clamp(16px,2vw,18px)] font-semibold tracking-tight truncate">
             Macro and Nutrition
           </h1>
           <router-link
             to="/schedule"
             class="btn btn-primary flex-1 sm:flex-none text-xs px-2 py-1"
+            @click="resetSuggestions"
           >
             Lịch
           </router-link>
@@ -585,10 +612,7 @@ loadFromLocal();
 
           <div class="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mt-2">
             <Stat label="IBW (kg)" :value="ibw.toFixed(2)" />
-            <Stat label="BMI"
-                  :value="bmi.toFixed(2)"
-                  :note="bmiInfo.status"
-                  :bad="bmiInfo.bad" />
+            <Stat label="BMI" :value="bmi.toFixed(2)" :note="bmiInfo.status" :bad="bmiInfo.bad" />
             <Stat label="BMR" :value="bmr.toFixed(1)" />
             <Stat label="TDEE" :value="tdee.toFixed(2)" />
           </div>
@@ -601,7 +625,7 @@ loadFromLocal();
                 bmiInfo.tone==='ok'   ? 'bg-teal-50 border-teal-200 text-teal-700' : ''
               ]"
             >
-              <div class="font-medium">BMI: {{ bmi.toFixed(2) }}, Tình trạng: {{ bmiInfo.status }} </div>
+              <div class="font-medium">BMI: {{ bmi.toFixed(2) }}, Tình trạng: {{ bmiInfo.status }}</div>
               <div v-if="bmiInfo.rangeText">{{ bmiInfo.rangeText }}</div>
               <div v-if="bmiInfo.deltaText">{{ bmiInfo.deltaText }}</div>
             </div>
@@ -632,7 +656,7 @@ loadFromLocal();
               <div class="card p-3">
                 <div class="mini">Protein</div>
                 <div class="kpi">{{ proteinG.toFixed(2) }}<span class="unit">g</span></div>
-                <div class="mini">{{ macrosEffective.p.toFixed(1) }}%</div>  
+                <div class="mini">{{ macrosEffective.p.toFixed(1) }}%</div>
               </div>
               <div class="card p-3">
                 <div class="mini">Carb</div>
@@ -645,7 +669,7 @@ loadFromLocal();
                 <div class="mini">{{ macrosEffective.f.toFixed(1) }}%</div>
               </div>
             </div>
-      
+
             <p class="mt-2 text-sm italic text-slate-500">
               Vui lòng tự chịu trách nhiệm cho các quyết định liên quan đến sức khỏe của bạn.
             </p>
@@ -694,13 +718,16 @@ loadFromLocal();
                         v-model="r.name"
                         placeholder="Ví dụ: Ức gà, Cơm trắng…"
                         class="tbl-input w-full"
+                        @input="showSuggestions[i] = true"
+                        @focus="showSuggestions[i] = true"
+                        @blur="showSuggestions[i] = false"
                       />
-                      <div v-if="debouncedSuggestions[i]?.value?.length" class="flex flex-wrap gap-1.5">
+                      <div v-if="showSuggestions[i] && debouncedSuggestions[i]?.value?.length" class="flex flex-wrap gap-1.5">
                         <button
                           v-for="s in debouncedSuggestions[i].value"
                           :key="s.id ?? s.name"
-                          @click="r.name = s.name"
-                          class="chip"
+                          @mousedown.prevent="r.name = s.name; showSuggestions[i] = false"
+                          class="chip text-black"
                         >
                           {{ s.name }}
                         </button>
@@ -781,7 +808,7 @@ loadFromLocal();
           </div>
 
           <p class="mt-3 text-sm text-slate-500 italic leading-relaxed border-t border-slate-200 pt-3">
-            <strong>Lưu ý:</strong>  
+            <strong>Lưu ý:</strong>
             Thông tin dinh dưỡng chỉ mang tính chất tham khảo, không thay thế tư vấn y tế hoặc chế độ ăn do chuyên gia khuyến nghị.
             Tất cả thực phẩm thực tế đều chứa cả protein, carb và fat ở mức độ khác nhau.
             Công thức tính: (gram / 100) × giá trị trên 100 g; Kcal = protein/carb(g) × 4 + fat(g) × 9.
@@ -790,7 +817,7 @@ loadFromLocal();
       </section>
 
       <div class="text-center text-[12px] text-slate-500">
-        Copyrights © 2025 by @trungthanhdev. 
+        Copyrights © 2025 by @trungthanhdev.
       </div>
     </main>
   </div>
