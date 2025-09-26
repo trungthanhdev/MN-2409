@@ -542,7 +542,7 @@ async function saveToLocal() {
     foodsReady,
   };
   localStorage.setItem(KEY, JSON.stringify(data));
-  alert("Đã lưu cấu hình & bữa ăn vào trình duyệt.");
+  alert("Lưu thành công");
   resetSuggestions();
 }
 
@@ -974,7 +974,7 @@ loadFromLocal();
                       placeholder="0"
                     />
                   </td>
-                  <td class="num text-slate-800" :data-label="'Protein (g)'">
+                  <td class="num text-slate-800 " :data-label="'Protein (g)'">
                     {{ rowMacro(r).p.toFixed(1) }}
                   </td>
                   <td class="num text-slate-800" :data-label="'Carb (g)'">
@@ -1007,27 +1007,27 @@ loadFromLocal();
             <div class="card mt-4 p-4 w-full">
               <div class="flex justify-between text-sm text-slate-500 mb-1">
                 <span>Protein (g)</span>
-                <span class="font-semibold text-slate-800">{{
+                <span class="font-semibold text-slate-800 px-2 py-1">{{
                   totalsMeal.p.toFixed(1)
                 }}</span>
               </div>
               <div class="flex justify-between text-sm text-slate-500 mb-1">
                 <span>Carb (g)</span>
-                <span class="font-semibold text-slate-800">{{
+                <span class="font-semibold text-slate-800 px-2 py-1">{{
                   totalsMeal.c.toFixed(1)
                 }}</span>
               </div>
               <div class="flex justify-between text-sm text-slate-500 mb-1">
                 <span>Fat (g)</span>
-                <span class="font-semibold text-slate-800">{{
+                <span class="font-semibold text-slate-800 px-2 py-1">{{
                   totalsMeal.f.toFixed(1)
                 }}</span>
               </div>
               <div
-                class="flex justify-between text-sm text-slate-600 font-bold"
+                class="flex justify-between text-sm text-slate-600 font-bold "
               >
                 <span>Kcal</span>
-                <span>{{ totalsMeal.kcal.toFixed(1) }}</span>
+                <span class="px-2 py-1" >{{ totalsMeal.kcal.toFixed(1) }}</span>
               </div>
             </div>
           </div>

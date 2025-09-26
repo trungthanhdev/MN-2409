@@ -73,17 +73,23 @@ function addExercise(group: WorkoutGroup) {
 
 // Delete exercise from a group
 function deleteExercise(group: WorkoutGroup, exerciseId: number) {
-  group.exercises = group.exercises.filter(ex => ex.id !== exerciseId);
-  // Update order of remaining exercises
-  group.exercises.forEach((ex, index) => {
-    ex.order = index + 1;
-    ex.id = index + 1;
-  });
+  const confirmed = confirm("Bạn có chắc muốn xóa bài tập này không?");
+  if (confirmed) {
+    group.exercises = group.exercises.filter(ex => ex.id !== exerciseId);
+    // Update order of remaining exercises
+    group.exercises.forEach((ex, index) => {
+      ex.order = index + 1;
+      ex.id = index + 1;
+    });
+  }
 }
 
 // Delete workout group
 function deleteWorkoutGroup(groupTitle: string) {
-  workoutGroups.value = workoutGroups.value.filter(group => group.title !== groupTitle);
+  const confirmed = confirm("Bạn có chắc muốn xóa buổi tập này không?");
+  if (confirmed) {
+    workoutGroups.value = workoutGroups.value.filter(group => group.title !== groupTitle);
+  }
 }
 
 const showModal = ref(false);
