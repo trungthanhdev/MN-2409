@@ -667,7 +667,8 @@ loadFromLocal();
                 min="0"
                 max="100"
                 step="0.1"
-                v-model.number="macros.p"
+                v-model="macros.p"
+                @input="macros.p = toNum(macros.p, 0)"
                 class="input h-11"
               />
             </div>
@@ -678,7 +679,8 @@ loadFromLocal();
                 min="0"
                 max="100"
                 step="0.1"
-                v-model.number="macros.c"
+                v-model="macros.c"
+                @input="macros.c = toNum(macros.c, 0)"
                 class="input h-11"
               />
             </div>
@@ -689,7 +691,9 @@ loadFromLocal();
                 min="0"
                 max="100"
                 step="0.1"
-                v-model.number="macros.f"
+                v-model="macros.f"
+                @input="macros.f = toNum(macros.f, 0)"
+
                 class="input h-11"
               />
             </div>
