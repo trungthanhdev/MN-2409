@@ -90,11 +90,13 @@ function toNum(v: unknown, fallback = 0): number {
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
 }
+
 function handleMacroInput(key: 'p' | 'c' | 'f', event: Event) {
   const input = event.target as HTMLInputElement;
   const value = toNum(input.value, 0);
   macros.value[key] = value;
 }
+
 function sanitizeMealRows(raw: any): { name: string; grams: number }[] {
   if (!Array.isArray(raw)) return [{ name: "", grams: 0 }];
   const rows = raw
@@ -397,15 +399,16 @@ async function loadFoods(): Promise<Food[]> {
   return arr;
 }
 
-const foodsDB = ref<Food[]>([]);
-onMounted(async () => {
-  try {
-    foodsDB.value = await loadFoods();
-    loadFromLocal();
-  } catch (e) {
-    console.error(e);
-  }
-});
+// const foodsDB = ref<Food[]>([]);
+// onMounted(async () => {
+//   try {
+//     foodsDB.value = await loadFoods();
+//     loadFromLocal();
+//   } catch (e) {
+//     console.error(e);
+//   }
+// });
+
 
 type MealRow = { name: string; grams: number };
 const rowsMeal = ref<MealRow[]>([{ name: "", grams: 0 }]);
@@ -561,8 +564,6 @@ async function saveToLocal() {
     foodsReady,
   };
   localStorage.setItem(KEY, JSON.stringify(data));
-  alert("Lưu thành công");
-  resetSuggestions();
 }
 
 const savedTotals = ref<{
@@ -608,22 +609,37 @@ function loadFromLocal() {
   }
 }
 
-function resetAll() {
-  if (!confirm("Đặt lại về mặc định?")) return;
-  gender.value = "male";
-  age.value = 0;
-  heightM.value = 0;
-  heightCM.value = 0;
-  weight.value = 0;
-  activity.value = 1.2;
-  preset.value = "maintenance";
-  macros.value = { p: 35, c: 30, f: 35 };
-  proteinPerKg.value = 1.8;
-  rowsMeal.value = [{ name: "", grams: 0 }];
-  resetSuggestions();
-}
+// Auto-save khi các giá trị thay đổi
+watch(
+  [
+    gender,
+    age,
+    heightM,
+    heightCM,
+    weight,
+    activity,
+    preset,
+    macros,
+    proteinPerKg,
+    rowsMeal,
+  ],
+  () => {
+    saveToLocal();
+  },
+  { deep: true }
+);
 
-loadFromLocal();
+// Xóa hàm resetAll vì không còn nút "Đặt lại"
+const foodsDB = ref<Food[]>([]);
+onMounted(async () => {
+  try {
+    foodsDB.value = await loadFoods();
+    loadFromLocal();
+  } catch (e) {
+    console.error(e);
+  }
+});
+
 </script>
 
 <template>
@@ -644,29 +660,13 @@ loadFromLocal();
             Lịch tập
           </router-link>
         </div>
-
-        <!-- Hàng 2: Đặt lại & Lưu -->
-        <div class="flex gap-4 w-full">
-          <button
-            @click="resetAll"
-            class="btn btn-ghost flex-1 text-sm px-4 py-3"
-          >
-            Đặt lại
-          </button>
-          <button
-            @click="saveToLocal"
-            class="btn btn-primary flex-1 text-sm px-4 py-3"
-          >
-            Lưu
-          </button>
-        </div>
       </div>
     </header>
 
     <!-- Main -->
     <main class="max-w-5xl mx-auto px-2 py-4 space-y-8">
       <!-- Meal ratio -->
-     <section class="card overflow-hidden">
+      <section class="card overflow-hidden">
         <div class="section-title">Điều chỉnh tỉ lệ</div>
         <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="space-y-3">
