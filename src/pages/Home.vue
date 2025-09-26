@@ -651,10 +651,10 @@ loadFromLocal();
           <div class="space-y-3">
             <label class="label">Chọn mục tiêu (preset)</label>
             <select v-model="preset" @change="applyPreset" class="input h-11">
-              <option value="maintenance">Maintenance</option>
+              <option value="maintenance">Duy trì</option>
               <option value="bulking">Bulking</option>
               <option value="cutting">Cutting</option>
-              <option value="custom">Custom</option>
+              <!-- <option value="custom">Custom</option> -->
             </select>
             <p class="note">Bạn có thể chỉnh % thủ công dù chọn preset.</p>
           </div>
@@ -717,14 +717,14 @@ loadFromLocal();
         <div class="section-title">Tình trạng hoặc mục tiêu cơ thể</div>
         <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label class="label">Gender</label>
+            <label class="label">Giới tính</label>
             <select v-model="gender" class="input h-11">
-              <option value="male">Male</option>
-              <option value="female">Female</option>
+              <option value="male">Nam</option>
+              <option value="female">Nữ</option>
             </select>
           </div>
           <div>
-            <label class="label">Age</label>
+            <label class="label">Tuổi</label>
             <input
               type="number"
               min="10"
@@ -734,7 +734,7 @@ loadFromLocal();
             />
           </div>
           <div>
-            <label class="label">Height (m)</label>
+            <label class="label">Chiều cao (m)</label>
             <input
               type="number"
               step="0.01"
@@ -745,7 +745,7 @@ loadFromLocal();
             />
           </div>
           <div>
-            <label class="label">Height (cm)</label>
+            <label class="label">Chiều cao (cm)</label>
             <input
               type="number"
               step="1"
@@ -756,7 +756,7 @@ loadFromLocal();
             />
           </div>
           <div>
-            <label class="label">Weight (kg)</label>
+            <label class="label">Cân nặng (kg)</label>
             <input
               type="number"
               step="0.1"
@@ -767,7 +767,7 @@ loadFromLocal();
             />
           </div>
           <div>
-            <label class="label">Activity Level</label>
+            <label class="label">Mức độ hoạt động</label>
             <select v-model.number="activity" class="input h-11">
               <option v-for="a in activities" :key="a.value" :value="a.value">
                 {{ a.label }} ({{ a.value }})
@@ -812,7 +812,7 @@ loadFromLocal();
           </div>
 
           <p class="note sm:col-span-2 lg:col-span-3">
-            IBW (Ideal body weight): Cân nặng tiêu chuẩn không gồm bao gồm mỡ
+            IBW (Ideal body weight): Cân nặng tiêu chuẩn không bao gồm mỡ
             (BMI mục tiêu ≈ 22).
           </p>
         </div>

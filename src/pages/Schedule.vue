@@ -71,6 +71,21 @@ function addExercise(group: WorkoutGroup) {
   });
 }
 
+// Delete exercise from a group
+function deleteExercise(group: WorkoutGroup, exerciseId: number) {
+  group.exercises = group.exercises.filter(ex => ex.id !== exerciseId);
+  // Update order of remaining exercises
+  group.exercises.forEach((ex, index) => {
+    ex.order = index + 1;
+    ex.id = index + 1;
+  });
+}
+
+// Delete workout group
+function deleteWorkoutGroup(groupTitle: string) {
+  workoutGroups.value = workoutGroups.value.filter(group => group.title !== groupTitle);
+}
+
 const showModal = ref(false);
 const newGroupTitle = ref("");
 
@@ -98,6 +113,28 @@ function addWorkoutGroup() {
 function closeModal() {
   showModal.value = false;
   newGroupTitle.value = "";
+}
+
+// Edit workout group title
+const editingGroup = ref<string | null>(null);
+const editGroupTitle = ref<string>("");
+
+function startEditGroup(group: WorkoutGroup) {
+  editingGroup.value = group.title;
+  editGroupTitle.value = group.title;
+}
+
+function saveEditGroup(group: WorkoutGroup) {
+  if (editGroupTitle.value.trim()) {
+    group.title = editGroupTitle.value.trim();
+  }
+  editingGroup.value = null;
+  editGroupTitle.value = "";
+}
+
+function cancelEditGroup() {
+  editingGroup.value = null;
+  editGroupTitle.value = "";
 }
 </script>
 
@@ -177,9 +214,42 @@ function closeModal() {
         class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-2xl"
       >
         <!-- Group Title -->
-        <h2 class="px-6 py-4 bg-gradient-to-r from-teal-600 to-teal-500 text-white font-semibold text-lg tracking-tight">
-          {{ group.title }}
-        </h2>
+        <div class="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-teal-600 to-teal-500 text-white">
+          <div class="flex items-center gap-3">
+            <template v-if="editingGroup === group.title">
+              <input
+                v-model="editGroupTitle"
+                class="title-input bg-transparent text-white font-semibold text-lg tracking-tight focus:outline-none"
+                placeholder="Tên buổi tập"
+                @keyup.enter="saveEditGroup(group)"
+                @blur="saveEditGroup(group)"
+              />
+              <button
+                @click="cancelEditGroup"
+                class="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-sm font-semibold hover:bg-gray-300 transition-all duration-200"
+              >
+                Huỷ
+              </button>
+            </template>
+            <template v-else>
+              <h2 class="font-semibold text-lg tracking-tight">
+                {{ group.title }}
+              </h2>
+              <button
+                @click="startEditGroup(group)"
+                class="px-2 py-1 bg-teal-700 text-white rounded-full text-sm font-semibold hover:bg-teal-800 transition-all duration-200"
+              >
+                Sửa
+              </button>
+            </template>
+          </div>
+          <button
+            @click="deleteWorkoutGroup(group.title)"
+            class="px-3 py-2 bg-rose-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-rose-700 active:scale-95 transition-all duration-200"
+          >
+            x
+          </button>
+        </div>
 
         <!-- Exercises -->
         <div class="divide-y divide-gray-100">
@@ -188,7 +258,7 @@ function closeModal() {
             :key="ex.id"
             class="p-2 pt-6 hover:bg-gray-50 transition-all duration-200 space-y-4"
           >
-            <!-- Row 1: Order + Name -->
+            <!-- Row 1: Order + Name + Delete Button -->
             <div class="flex items-center gap-4">
               <input
                 v-model="ex.order"
@@ -201,6 +271,12 @@ function closeModal() {
                 class="detail-input flex-1 bg-gray-50 rounded-lg"
                 placeholder="Tên bài tập"
               />
+              <button
+                @click="deleteExercise(group, ex.id)"
+                class="px-3 py-2 bg-rose-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-rose-700 active:scale-95 transition-all duration-200"
+              >
+                x
+              </button>
             </div>
 
             <!-- Row 2: Additional Info -->
@@ -268,6 +344,12 @@ function closeModal() {
 .detail-input {
   @apply flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700
          focus:outline-none focus:ring-2 focus:ring-teal-300 placeholder-teal-500
+         transition-all duration-200;
+}
+
+.title-input {
+  @apply border-none px-0 py-0 text-lg font-semibold text-white
+         focus:outline-none focus:ring-2 focus:ring-teal-300 placeholder-white
          transition-all duration-200;
 }
 
