@@ -1,4 +1,3 @@
-```vue
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 
@@ -17,6 +16,7 @@ interface Exercise {
 interface WorkoutGroup {
   title: string;
   exercises: Exercise[];
+  isExpanded?: boolean;
 }
 
 const initialWorkoutGroups: WorkoutGroup[] = [
@@ -24,13 +24,15 @@ const initialWorkoutGroups: WorkoutGroup[] = [
     title: "Chest",
     exercises: [
       { id: 1, order: 1, name: "Bài tập 1", setsReps: "5x10", weight: "20kg", focus: "Body" }
-    ]
+    ],
+    isExpanded: true
   },
   {
     title: "Back",
     exercises: [
       { id: 1, order: 1, name: "Bài tập 1", setsReps: "3x10", weight: "35kg", focus: "Body" }
-    ]
+    ],
+    isExpanded: true
   }
 ];
 
@@ -59,29 +61,62 @@ watch(workoutGroups, () => {
 
 // Add exercise to a group
 function addExercise(group: WorkoutGroup) {
-  group.exercises.push({
-    id: group.exercises.length + 1,
-    order: group.exercises.length + 1,
-    name: "",
-    setsReps: "",
-    weight: "",
-    focus: "",
-    note: "",
-    selected: false
-  });
+  const originalGroup = workoutGroups.value.find(g => g.title === group.title);
+  if (originalGroup) {
+    originalGroup.exercises.push({
+      id: originalGroup.exercises.length + 1,
+      order: originalGroup.exercises.length + 1,
+      name: "",
+      setsReps: "",
+      weight: "",
+      focus: "",
+      note: "",
+      selected: false
+    });
+  }
 }
 
 // Delete exercise from a group
 function deleteExercise(group: WorkoutGroup, exerciseId: number) {
   const confirmed = confirm("Bạn có chắc muốn xóa bài tập này không?");
   if (confirmed) {
-    group.exercises = group.exercises.filter(ex => ex.id !== exerciseId);
-    // Update order of remaining exercises
-    group.exercises.forEach((ex, index) => {
-      ex.order = index + 1;
-      ex.id = index + 1;
-    });
+    const originalGroup = workoutGroups.value.find(g => g.title === group.title);
+    if (originalGroup) {
+      originalGroup.exercises = originalGroup.exercises.filter(ex => ex.id !== exerciseId);
+      originalGroup.exercises.forEach((ex, index) => {
+        ex.order = index + 1;
+        ex.id = index + 1;
+      });
+    }
   }
+}
+
+// Move exercise up or down
+// Move exercise up or down
+// Move exercise up or down
+function moveExercise(group: WorkoutGroup, exerciseId: number, direction: 'up' | 'down') {
+  const originalGroup = workoutGroups.value.find(g => g.title === group.title);
+  if (!originalGroup) return; // Thoát nếu không tìm thấy nhóm
+
+  const index = originalGroup.exercises.findIndex(ex => ex.id === exerciseId);
+  if (index === -1) return; // Thoát nếu không tìm thấy bài tập
+
+  if (direction === 'up' && index > 0) {
+  [originalGroup.exercises[index], originalGroup.exercises[index - 1]] =
+  [originalGroup.exercises[index - 1]!, originalGroup.exercises[index]!];
+} else if (direction === 'down' && index < originalGroup.exercises.length - 1) {
+  [originalGroup.exercises[index], originalGroup.exercises[index + 1]] =
+  [originalGroup.exercises[index + 1]!, originalGroup.exercises[index]!];
+}
+
+
+  // Update order and id
+  originalGroup.exercises.forEach((ex, i) => {
+    ex.order = i + 1;
+    ex.id = i + 1;
+  });
+
+  saveToLocalStorage();
 }
 
 // Delete workout group
@@ -109,7 +144,8 @@ function addWorkoutGroup() {
   if (newGroupTitle.value.trim()) {
     workoutGroups.value.push({
       title: newGroupTitle.value.trim(),
-      exercises: []
+      exercises: [],
+      isExpanded: true
     });
     showModal.value = false;
     newGroupTitle.value = "";
@@ -132,7 +168,10 @@ function startEditGroup(group: WorkoutGroup) {
 
 function saveEditGroup(group: WorkoutGroup) {
   if (editGroupTitle.value.trim()) {
-    group.title = editGroupTitle.value.trim();
+    const originalGroup = workoutGroups.value.find(g => g.title === group.title);
+    if (originalGroup) {
+      originalGroup.title = editGroupTitle.value.trim();
+    }
   }
   editingGroup.value = null;
   editGroupTitle.value = "";
@@ -141,6 +180,15 @@ function saveEditGroup(group: WorkoutGroup) {
 function cancelEditGroup() {
   editingGroup.value = null;
   editGroupTitle.value = "";
+}
+
+// Toggle dropdown for workout group
+function toggleGroup(group: WorkoutGroup) {
+  const originalGroup = workoutGroups.value.find(g => g.title === group.title);
+  if (originalGroup) {
+    originalGroup.isExpanded = !originalGroup.isExpanded;
+    saveToLocalStorage();
+  }
 }
 </script>
 
@@ -174,7 +222,7 @@ function cancelEditGroup() {
           và <span class="font-bold text-slate-700">30%</span> đến từ việc tập luyện. 
           Hãy đảm bảo bạn có một kế hoạch dinh dưỡng hợp lý và chương trình luyện tập phù hợp.
         </p>
-        <div class="flex justify-end gap-3 mt-4">
+        <div class="flex flex-col sm:flex-row justify-end gap-3 mt-4">
           <button
             @click="openAddWorkoutGroupModal"
             class="px-4 py-2 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-300"
@@ -220,7 +268,7 @@ function cancelEditGroup() {
         class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-2xl"
       >
         <!-- Group Title -->
-        <div class="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-teal-600 to-teal-500 text-white">
+        <div class="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-teal-600 to-teal-500 text-white cursor-pointer" @click="toggleGroup(group)">
           <div class="flex items-center gap-3">
             <template v-if="editingGroup === group.title">
               <input
@@ -229,9 +277,10 @@ function cancelEditGroup() {
                 placeholder="Tên buổi tập"
                 @keyup.enter="saveEditGroup(group)"
                 @blur="saveEditGroup(group)"
+                @click.stop
               />
               <button
-                @click="cancelEditGroup"
+                @click.stop="cancelEditGroup"
                 class="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-sm font-semibold hover:bg-gray-300 transition-all duration-200"
               >
                 Huỷ
@@ -242,96 +291,119 @@ function cancelEditGroup() {
                 {{ group.title }}
               </h2>
               <button
-                @click="startEditGroup(group)"
+                @click.stop="startEditGroup(group)"
                 class="px-2 py-1 bg-teal-700 text-white rounded-full text-sm font-semibold hover:bg-teal-800 transition-all duration-200"
               >
                 Sửa
               </button>
             </template>
           </div>
-          <button
-            @click="deleteWorkoutGroup(group.title)"
-            class="px-3 py-2 bg-rose-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-rose-700 active:scale-95 transition-all duration-200"
-          >
-            x
-          </button>
-        </div>
-
-        <!-- Exercises -->
-        <div class="divide-y divide-gray-100">
-          <div
-            v-for="ex in group.exercises"
-            :key="ex.id"
-            class="p-2 pt-6 hover:bg-gray-50 transition-all duration-200 space-y-4"
-          >
-            <!-- Row 1: Order + Name + Delete Button -->
-            <div class="flex items-center gap-4">
-              <input
-                v-model="ex.order"
-                type="number"
-                class="order-input w-16 text-center bg-gray-50 rounded-lg"
-                placeholder="#"
-              />
-              <input
-                v-model="ex.name"
-                class="detail-input flex-1 bg-gray-50 rounded-lg"
-                placeholder="Tên bài tập"
-              />
-              <button
-                @click="deleteExercise(group, ex.id)"
-                class="px-3 py-2 bg-rose-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-rose-700 active:scale-95 transition-all duration-200"
-              >
-                x
-              </button>
-            </div>
-
-            <!-- Row 2: Additional Info -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
-              <div class="flex items-center gap-3">
-                <span class="field-label">Tạ:</span>
-                <input
-                  v-model="ex.weight"
-                  class="detail-input text-center bg-gray-50 rounded-lg"
-                  placeholder="20kg"
-                />
-              </div>
-              <div class="flex items-center gap-3">
-                <span class="field-label">Sets & Reps:</span>
-                <input
-                  v-model="ex.setsReps"
-                  class="detail-input text-center bg-gray-50 rounded-lg"
-                  placeholder="3x10"
-                />
-              </div>
-              <div class="flex items-center gap-3">
-                <span class="field-label">Nhóm cơ:</span>
-                <input
-                  v-model="ex.focus"
-                  class="detail-input text-center bg-gray-50 rounded-lg"
-                  placeholder="Nhóm cơ"
-                />
-              </div>
-              <div class="flex items-center gap-3 col-span-1 sm:col-span-2 lg:col-span-1">
-                <span class="field-label">Ghi chú:</span>
-                <textarea
-                  v-model="ex.note"
-                  class="detail-input flex-1 bg-gray-50 rounded-lg p-2 resize-none"
-                  placeholder="Ghi chú"
-                  rows="3"
-                />
-              </div>
-            </div>
+          <div class="flex items-center gap-3">
+            <span class="text-sm">{{ group.isExpanded ? '▲' : '▼' }}</span>
+            <button
+              @click.stop="deleteWorkoutGroup(group.title)"
+              class="px-3 py-2 bg-rose-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-rose-700 active:scale-95 transition-all duration-200"
+            >
+              x
+            </button>
           </div>
         </div>
 
-        <!-- Add new -->
-        <div class="p-6 bg-gray-50">
-          <button
-            @click="addExercise(group)"
-            class="w-full px-4 py-3 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-300"
-          >
-            + Add Exercise
-          </button>
+        <!-- Exercises -->
+        <div
+          v-if="group.isExpanded"
+          class="dropdown-content overflow-hidden"
+          :class="{ 'expanded': group.isExpanded }"
+        >
+          <div class="divide-y divide-gray-100">
+            <div
+              v-for="ex in group.exercises"
+              :key="ex.id"
+              class="p-2 pt-6 hover:bg-gray-50 transition-all duration-200 space-y-4"
+            >
+              <!-- Row 1: Order + Name + Move Buttons + Delete Button -->
+              <div class="flex items-center gap-2">
+                <input
+                  v-model="ex.order"
+                  type="number"
+                  class="order-input w-16 text-center bg-gray-50 rounded-lg font-bold"
+                  placeholder="#"
+                />
+                <input
+                  v-model="ex.name"
+                  class="detail-input flex-1 bg-gray-50 rounded-lg font-bold"
+                  placeholder="Tên bài tập"
+                />
+                <button
+                  v-if="ex.order > 1"
+                  @click="moveExercise(group, ex.id, 'up')"
+                  class="px-3 py-2 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-200"
+                >
+                  ↑
+                </button>
+                <button
+                  v-if="ex.order < group.exercises.length"
+                  @click="moveExercise(group, ex.id, 'down')"
+                  class="px-3 py-2 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-200"
+                >
+                  ↓
+                </button>
+                <button
+                  @click="deleteExercise(group, ex.id)"
+                  class="px-3 py-2 bg-rose-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-rose-700 active:scale-95 transition-all duration-200"
+                >
+                  x
+                </button>
+              </div>
+
+              <!-- Row 2: Additional Info -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
+                <div class="flex items-center gap-3">
+                  <span class="field-label">Tạ:</span>
+                  <input
+                    v-model="ex.weight"
+                    class="detail-input text-center bg-gray-50 rounded-lg"
+                    placeholder="20kg"
+                  />
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="field-label">Sets & Reps:</span>
+                  <input
+                    v-model="ex.setsReps"
+                    class="detail-input text-center bg-gray-50 rounded-lg"
+                    placeholder="3x10"
+                  />
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="field-label">Nhóm cơ:</span>
+                  <input
+                    v-model="ex.focus"
+                    class="detail-input text-center bg-gray-50 rounded-lg"
+                    placeholder="Nhóm cơ"
+                  />
+                </div>
+                <div class="flex items-center gap-3 col-span-1 sm:col-span-2 lg:col-span-1">
+                  <span class="field-label">Ghi chú:</span>
+                  <textarea
+                    v-model="ex.note"
+                    class="detail-input flex-1 bg-gray-50 rounded-lg p-2 resize-none"
+                    placeholder="Ghi chú"
+                    rows="3"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add new -->
+          <div class="p-6 bg-gray-50">
+            <button
+              @click="addExercise(group)"
+              class="w-full px-4 py-3 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-200"
+            >
+              + Add Exercise
+            </button>
+          </div>
         </div>
       </div>
       <div class="text-center text-[12px] text-slate-500">
@@ -360,7 +432,7 @@ function cancelEditGroup() {
 }
 
 .field-label {
-  @apply text-gray-500 font-medium text-sm;
+  @apply text-black font-bold text-sm;
 }
 
 /* Smooth hover and focus effects */
@@ -381,5 +453,16 @@ button:hover {
 button:active {
   @apply shadow-sm;
 }
+
+/* Dropdown transition */
+.dropdown-content {
+  transition: all 0.4s ease-in-out;
+  max-height: 0;
+  opacity: 0;
+}
+
+.dropdown-content.expanded {
+  max-height: 2000px; /* Giá trị lớn hơn để chứa nhiều bài tập */
+  opacity: 1;
+}
 </style>
-```
