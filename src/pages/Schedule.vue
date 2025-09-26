@@ -92,8 +92,6 @@ function deleteExercise(group: WorkoutGroup, exerciseId: number) {
 }
 
 // Move exercise up or down
-// Move exercise up or down
-// Move exercise up or down
 function moveExercise(group: WorkoutGroup, exerciseId: number, direction: 'up' | 'down') {
   const originalGroup = workoutGroups.value.find(g => g.title === group.title);
   if (!originalGroup) return; // Thoát nếu không tìm thấy nhóm
@@ -322,38 +320,42 @@ function toggleGroup(group: WorkoutGroup) {
               class="p-2 pt-6 hover:bg-gray-50 transition-all duration-200 space-y-4"
             >
               <!-- Row 1: Order + Name + Move Buttons + Delete Button -->
-              <div class="flex items-center gap-2">
-                <input
-                  v-model="ex.order"
-                  type="number"
-                  class="order-input w-16 text-center bg-gray-50 rounded-lg font-bold"
-                  placeholder="#"
-                />
-                <input
-                  v-model="ex.name"
-                  class="detail-input flex-1 bg-gray-50 rounded-lg font-bold"
-                  placeholder="Tên bài tập"
-                />
-                <button
-                  v-if="ex.order > 1"
-                  @click="moveExercise(group, ex.id, 'up')"
-                  class="px-3 py-2 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-200"
-                >
-                  ↑
-                </button>
-                <button
-                  v-if="ex.order < group.exercises.length"
-                  @click="moveExercise(group, ex.id, 'down')"
-                  class="px-3 py-2 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-200"
-                >
-                  ↓
-                </button>
-                <button
-                  @click="deleteExercise(group, ex.id)"
-                  class="px-3 py-2 bg-rose-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-rose-700 active:scale-95 transition-all duration-200"
-                >
-                  x
-                </button>
+              <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-1">
+                <div class="flex items-center gap-2 sm:gap-1">
+                  <input
+                    v-model="ex.order"
+                    type="number"
+                    class="order-input w-16 text-center bg-gray-50 rounded-lg font-bold"
+                    placeholder="#"
+                  />
+                  <input
+                    v-model="ex.name"
+                    class="detail-input flex-1 bg-gray-50 rounded-lg font-bold"
+                    placeholder="Tên bài tập"
+                  />
+                </div>
+                <div class="flex justify-end gap-1">
+                  <button
+                    v-if="ex.order > 1"
+                    @click="moveExercise(group, ex.id, 'up')"
+                    class="px-2 py-1 sm:px-3 sm:py-2 bg-teal-600 text-white rounded-full text-xs sm:text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-200 min-w-[32px]"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    v-if="ex.order < group.exercises.length"
+                    @click="moveExercise(group, ex.id, 'down')"
+                    class="px-2 py-1 sm:px-3 sm:py-2 bg-teal-600 text-white rounded-full text-xs sm:text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-200 min-w-[32px]"
+                  >
+                    ↓
+                  </button>
+                  <button
+                    @click="deleteExercise(group, ex.id)"
+                    class="px-2 py-1 sm:px-3 sm:py-2 bg-rose-600 text-white rounded-full text-xs sm:text-sm font-semibold shadow-md hover:bg-rose-700 active:scale-95 transition-all duration-200 min-w-[32px]"
+                  >
+                    x
+                  </button>
+                </div>
               </div>
 
               <!-- Row 2: Additional Info -->
@@ -399,7 +401,7 @@ function toggleGroup(group: WorkoutGroup) {
           <div class="p-6 bg-gray-50">
             <button
               @click="addExercise(group)"
-              class="w-full px-4 py-3 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-200"
+              class="w-full px-4 py-3 bg-teal-600 text-white rounded-full text-sm font-semibold shadow-md hover:bg-teal-700 active:scale-95 transition-all duration-300"
             >
               + Add Exercise
             </button>
@@ -421,7 +423,7 @@ function toggleGroup(group: WorkoutGroup) {
 
 .detail-input {
   @apply flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700
-         focus:outline-none focus:ring-2 focus:ring-teal-300 placeholder-teal-500
+         focus:outline-none focus:ring-2 focus:ring-teal-300 placeholder-gray-400
          transition-all duration-200;
 }
 
