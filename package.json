@@ -9,6 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tailwindcss/typography": "^0.5.19",
+    "marked": "^16.3.0",
+    "openai": "^5.23.0",
     "vue": "^3.5.21",
     "vue-router": "^4.5.1",
     "xlsx": "^0.18.5"
