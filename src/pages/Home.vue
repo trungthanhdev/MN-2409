@@ -83,12 +83,18 @@ const preset = ref<"maintenance" | "bulking" | "cutting" | "custom">(
 const macros = ref({ p: 35, c: 30, f: 35 });
 const proteinPerKg = ref(1.8);
 
-function toNum(v: unknown, fallback = 0) {
+// Cải thiện hàm toNum để xử lý chuỗi rỗng và giá trị không hợp lệ
+function toNum(v: unknown, fallback = 0): number {
+  if (v === "" || v == null) return fallback;
   if (typeof v === "string") v = v.replace(",", ".");
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
 }
-
+function handleMacroInput(key: 'p' | 'c' | 'f', event: Event) {
+  const input = event.target as HTMLInputElement;
+  const value = toNum(input.value, 0);
+  macros.value[key] = value;
+}
 function sanitizeMealRows(raw: any): { name: string; grams: number }[] {
   if (!Array.isArray(raw)) return [{ name: "", grams: 0 }];
   const rows = raw
@@ -181,19 +187,32 @@ const tdee = computed(() => {
   return base * (act || 1);
 });
 
-const macrosEffective = computed(() => macros.value);
-const sumPctEff = computed(
-  () =>
-    macrosEffective.value.p + macrosEffective.value.c + macrosEffective.value.f
-);
+const macrosEffective = computed(() => ({
+  p: toNum(macros.value.p, 0),
+  c: toNum(macros.value.c, 0),
+  f: toNum(macros.value.f, 0),
+}));
 
-const proteinG = computed(
-  () => (tdee.value * (macrosEffective.value.p / 100)) / 4
+const sumPctEff = computed(() => {
+  const { p, c, f } = macrosEffective.value;
+  return Number.isFinite(p + c + f) ? p + c + f : 0;
+});
+
+const proteinG = computed(() =>
+  Number.isFinite(tdee.value) && Number.isFinite(macrosEffective.value.p)
+    ? (tdee.value * (macrosEffective.value.p / 100)) / 4
+    : 0
 );
-const carbG = computed(
-  () => (tdee.value * (macrosEffective.value.c / 100)) / 4
+const carbG = computed(() =>
+  Number.isFinite(tdee.value) && Number.isFinite(macrosEffective.value.c)
+    ? (tdee.value * (macrosEffective.value.c / 100)) / 4
+    : 0
 );
-const fatG = computed(() => (tdee.value * (macrosEffective.value.f / 100)) / 9);
+const fatG = computed(() =>
+  Number.isFinite(tdee.value) && Number.isFinite(macrosEffective.value.f)
+    ? (tdee.value * (macrosEffective.value.f / 100)) / 9
+    : 0
+);
 
 function applyPreset() {
   if (preset.value === "bulking") macros.value = { p: 35, c: 40, f: 25 };
@@ -566,7 +585,11 @@ function loadFromLocal() {
     weight.value = toNum(d.weight, weight.value);
     activity.value = toNum(d.activity, activity.value);
     preset.value = d.preset ?? preset.value;
-    macros.value = d.macros ?? macros.value;
+    macros.value = {
+      p: toNum(d.macros?.p, macros.value.p),
+      c: toNum(d.macros?.c, macros.value.c),
+      f: toNum(d.macros?.f, macros.value.f),
+    };
     proteinPerKg.value = toNum(d.proteinPerKg, proteinPerKg.value);
 
     if (d.rowsMeal) {
@@ -607,45 +630,43 @@ loadFromLocal();
   <div class="min-h-screen bg-gray-100 font-sans">
     <!-- Header -->
     <header
-  class="sticky top-0 z-20 bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg"
->
-  <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-3">
-    <!-- Hàng 1: Tiêu đề và Lịch tập -->
-    <div class="flex justify-between items-center w-full">
-      <h1 class="font-bold text-xl">Chế độ dinh dưỡng</h1>
-      <router-link
-        to="/schedule"
-        class="bg-white text-teal-700 px-4 py-2 rounded-full text-sm font-semibold shadow-md hover:bg-teal-50 transition-all duration-300"
-        @click="resetSuggestions"
-      >
-        Lịch tập
-      </router-link>
-    </div>
+      class="sticky top-0 z-20 bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg"
+    >
+      <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-3">
+        <!-- Hàng 1: Tiêu đề và Lịch tập -->
+        <div class="flex justify-between items-center w-full">
+          <h1 class="font-bold text-xl">Chế độ dinh dưỡng</h1>
+          <router-link
+            to="/schedule"
+            class="bg-white text-teal-700 px-4 py-2 rounded-full text-sm font-semibold shadow-md hover:bg-teal-50 transition-all duration-300"
+            @click="resetSuggestions"
+          >
+            Lịch tập
+          </router-link>
+        </div>
 
-    <!-- Hàng 2: Đặt lại & Lưu -->
-   <div class="flex gap-4 w-full">
-  <button
-    @click="resetAll"
-    class="btn btn-ghost flex-1 text-sm px-4 py-3"
-  >
-    Đặt lại
-  </button>
-  <button
-    @click="saveToLocal"
-    class="btn btn-primary flex-1 text-sm px-4 py-3"
-  >
-    Lưu
-  </button>
-</div>
-
-  </div>
-</header>
-
+        <!-- Hàng 2: Đặt lại & Lưu -->
+        <div class="flex gap-4 w-full">
+          <button
+            @click="resetAll"
+            class="btn btn-ghost flex-1 text-sm px-4 py-3"
+          >
+            Đặt lại
+          </button>
+          <button
+            @click="saveToLocal"
+            class="btn btn-primary flex-1 text-sm px-4 py-3"
+          >
+            Lưu
+          </button>
+        </div>
+      </div>
+    </header>
 
     <!-- Main -->
     <main class="max-w-5xl mx-auto px-2 py-4 space-y-8">
       <!-- Meal ratio -->
-      <section class="card overflow-hidden">
+     <section class="card overflow-hidden">
         <div class="section-title">Điều chỉnh tỉ lệ</div>
         <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="space-y-3">
@@ -654,7 +675,6 @@ loadFromLocal();
               <option value="maintenance">Duy trì</option>
               <option value="bulking">Bulking</option>
               <option value="cutting">Cutting</option>
-              <!-- <option value="custom">Custom</option> -->
             </select>
             <p class="note">Bạn có thể chỉnh % thủ công dù chọn preset.</p>
           </div>
@@ -667,8 +687,9 @@ loadFromLocal();
                 min="0"
                 max="100"
                 step="0.1"
-                v-model="macros.p"
+                v-model.number="macros.p"
                 @blur="macros.p = toNum(macros.p, 0)"
+                @input="handleMacroInput('p', $event)"
                 class="input h-11"
               />
             </div>
@@ -679,8 +700,9 @@ loadFromLocal();
                 min="0"
                 max="100"
                 step="0.1"
-                v-model="macros.c"
+                v-model.number="macros.c"
                 @blur="macros.c = toNum(macros.c, 0)"
+                @input="handleMacroInput('c', $event)"
                 class="input h-11"
               />
             </div>
@@ -691,14 +713,14 @@ loadFromLocal();
                 min="0"
                 max="100"
                 step="0.1"
-                v-model="macros.f"
+                v-model.number="macros.f"
                 @blur="macros.f = toNum(macros.f, 0)"
-
+                @input="handleMacroInput('f', $event)"
                 class="input h-11"
               />
             </div>
             <div class="sm:col-span-3 text-sm">
-               <span class="text-black font-medium">Tổng: </span>
+              <span class="text-black font-medium">Tổng: </span>
               <span
                 :class="
                   sumPctEff === 100
@@ -715,7 +737,6 @@ loadFromLocal();
           </div>
         </div>
       </section>
-
       <!-- Body Condition -->
       <section class="card overflow-hidden">
         <div class="section-title">Tình trạng hoặc mục tiêu cơ thể</div>
@@ -974,7 +995,7 @@ loadFromLocal();
                       min="0"
                       step="1"
                       v-model.number="r.grams"
-                       class="tbl-input text-center w-20 px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-400 focus:outline-none"
+                      class="tbl-input text-center w-20 px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-400 focus:outline-none"
                       placeholder="0"
                     />
                   </td>
@@ -1009,32 +1030,31 @@ loadFromLocal();
               </button>
             </div>
             <div class="card mt-4 p-4 w-full">
-  <div class="flex justify-between text-sm text-slate-500 mb-1">
-    <span>Protein (g)</span>
-    <span class="inline-flex items-center justify-center font-semibold text-slate-800 px-4 py-1 min-w-[50px] text-center">
-      {{ totalsMeal.p.toFixed(1) }}
-    </span>
-  </div>
-  <div class="flex justify-between text-sm text-slate-500 mb-1">
-    <span>Carb (g)</span>
-    <span class="inline-flex items-center justify-center font-semibold text-slate-800 px-4 py-1 min-w-[50px] text-center">
-      {{ totalsMeal.c.toFixed(1) }}
-    </span>
-  </div>
-  <div class="flex justify-between text-sm text-slate-500 mb-1">
-    <span>Fat (g)</span>
-    <span class="inline-flex items-center justify-center font-semibold text-slate-800 px-4 py-1 min-w-[50px] text-center">
-      {{ totalsMeal.f.toFixed(1) }}
-    </span>
-  </div>
-  <div class="flex justify-between text-sm text-slate-600 font-bold">
-    <span>Kcal</span>
-    <span class="inline-flex items-center justify-center px-4 py-1 min-w-[50px] text-center">
-      {{ totalsMeal.kcal.toFixed(1) }}
-    </span>
-  </div>
-</div>
-
+              <div class="flex justify-between text-sm text-slate-500 mb-1">
+                <span>Protein (g)</span>
+                <span class="inline-flex items-center justify-center font-semibold text-slate-800 px-4 py-1 min-w-[50px] text-center">
+                  {{ totalsMeal.p.toFixed(1) }}
+                </span>
+              </div>
+              <div class="flex justify-between text-sm text-slate-500 mb-1">
+                <span>Carb (g)</span>
+                <span class="inline-flex items-center justify-center font-semibold text-slate-800 px-4 py-1 min-w-[50px] text-center">
+                  {{ totalsMeal.c.toFixed(1) }}
+                </span>
+              </div>
+              <div class="flex justify-between text-sm text-slate-500 mb-1">
+                <span>Fat (g)</span>
+                <span class="inline-flex items-center justify-center font-semibold text-slate-800 px-4 py-1 min-w-[50px] text-center">
+                  {{ totalsMeal.f.toFixed(1) }}
+                </span>
+              </div>
+              <div class="flex justify-between text-sm text-slate-600 font-bold">
+                <span>Kcal</span>
+                <span class="inline-flex items-center justify-center px-4 py-1 min-w-[50px] text-center">
+                  {{ totalsMeal.kcal.toFixed(1) }}
+                </span>
+              </div>
+            </div>
           </div>
 
           <div
