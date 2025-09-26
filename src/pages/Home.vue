@@ -694,7 +694,7 @@ loadFromLocal();
               />
             </div>
             <div class="sm:col-span-3 text-sm">
-              Tổng:
+               <span class="text-black font-medium">Tổng: </span>
               <span
                 :class="
                   sumPctEff === 100
@@ -705,7 +705,7 @@ loadFromLocal();
                 {{ sumPctEff.toFixed(1) }}%
               </span>
               <span v-if="sumPctEff !== 100" class="ml-2 text-rose-600"
-                >(Cần = 100%)</span
+                >(Tỉ lệ khuyến nghị: 100%)</span
               >
             </div>
           </div>
@@ -970,7 +970,7 @@ loadFromLocal();
                       min="0"
                       step="1"
                       v-model.number="r.grams"
-                      class="tbl-input text-center"
+                       class="tbl-input text-center w-20 px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-400 focus:outline-none"
                       placeholder="0"
                     />
                   </td>
@@ -1005,31 +1005,32 @@ loadFromLocal();
               </button>
             </div>
             <div class="card mt-4 p-4 w-full">
-              <div class="flex justify-between text-sm text-slate-500 mb-1">
-                <span>Protein (g)</span>
-                <span class="font-semibold text-slate-800 px-2 py-1">{{
-                  totalsMeal.p.toFixed(1)
-                }}</span>
-              </div>
-              <div class="flex justify-between text-sm text-slate-500 mb-1">
-                <span>Carb (g)</span>
-                <span class="font-semibold text-slate-800 px-2 py-1">{{
-                  totalsMeal.c.toFixed(1)
-                }}</span>
-              </div>
-              <div class="flex justify-between text-sm text-slate-500 mb-1">
-                <span>Fat (g)</span>
-                <span class="font-semibold text-slate-800 px-2 py-1">{{
-                  totalsMeal.f.toFixed(1)
-                }}</span>
-              </div>
-              <div
-                class="flex justify-between text-sm text-slate-600 font-bold "
-              >
-                <span>Kcal</span>
-                <span class="px-2 py-1" >{{ totalsMeal.kcal.toFixed(1) }}</span>
-              </div>
-            </div>
+  <div class="flex justify-between text-sm text-slate-500 mb-1">
+    <span>Protein (g)</span>
+    <span class="inline-flex items-center justify-center font-semibold text-slate-800 px-4 py-1 min-w-[50px] text-center">
+      {{ totalsMeal.p.toFixed(1) }}
+    </span>
+  </div>
+  <div class="flex justify-between text-sm text-slate-500 mb-1">
+    <span>Carb (g)</span>
+    <span class="inline-flex items-center justify-center font-semibold text-slate-800 px-4 py-1 min-w-[50px] text-center">
+      {{ totalsMeal.c.toFixed(1) }}
+    </span>
+  </div>
+  <div class="flex justify-between text-sm text-slate-500 mb-1">
+    <span>Fat (g)</span>
+    <span class="inline-flex items-center justify-center font-semibold text-slate-800 px-4 py-1 min-w-[50px] text-center">
+      {{ totalsMeal.f.toFixed(1) }}
+    </span>
+  </div>
+  <div class="flex justify-between text-sm text-slate-600 font-bold">
+    <span>Kcal</span>
+    <span class="inline-flex items-center justify-center px-4 py-1 min-w-[50px] text-center">
+      {{ totalsMeal.kcal.toFixed(1) }}
+    </span>
+  </div>
+</div>
+
           </div>
 
           <div
